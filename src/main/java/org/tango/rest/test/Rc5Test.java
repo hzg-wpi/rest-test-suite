@@ -57,7 +57,7 @@ public class Rc5Test {
     public void testVersion(){
         Map<String,String> result = client.target(CONTEXT.url).request().get(HashMap.class);
 
-        Assert.assertTrue(result.containsKey(REST_API_VERSION));
+        assertTrue(result.containsKey(REST_API_VERSION));
     }
 
     @Test
@@ -65,10 +65,10 @@ public class Rc5Test {
         UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.uri).path("hosts/localhost;port=10000");
         TangoHost result = client.target(uriBuilder.build()).request().get(TangoHost.class);
 
-        Assert.assertEquals("localhost:10000", result.id);
-        Assert.assertEquals("localhost", result.host);
-        Assert.assertEquals("10000", result.port);
-        Assert.assertEquals("sys/database/2", result.name);
+        assertEquals("localhost:10000", result.id);
+        assertEquals("localhost", result.host);
+        assertEquals("10000", result.port);
+        assertEquals("sys/database/2", result.name);
     }
 
     @Test(expected = BadRequestException.class)
@@ -76,7 +76,7 @@ public class Rc5Test {
         UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.uri).path("hosts/localhost;port=12345");
         TangoHost result = client.target(uriBuilder.build()).request().get(TangoHost.class);
 
-        Assert.fail();
+        fail();
     }
 
     @Test(expected = NotFoundException.class)
@@ -84,7 +84,7 @@ public class Rc5Test {
         UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.uri).path("hosts/XXXX");
         TangoHost result = client.target(uriBuilder.build()).request().get(TangoHost.class);
 
-        Assert.fail();
+        fail();
     }
 
     @Test
@@ -92,7 +92,7 @@ public class Rc5Test {
         UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.devicesUri);
         List<NamedEntity> result = client.target(uriBuilder.build()).request().get(new GenericType<List<NamedEntity>>(){});
 
-        Assert.assertFalse(result.isEmpty());
+        assertFalse(result.isEmpty());
         NamedEntity entity = Iterables.find(result, new Predicate<NamedEntity>() {
             @Override
             public boolean apply(@Nullable NamedEntity input) {
@@ -100,7 +100,7 @@ public class Rc5Test {
             }
         });
 
-        Assert.assertNotNull(entity);
+        assertNotNull(entity);
     }
 
     @Test
@@ -108,7 +108,7 @@ public class Rc5Test {
         UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.devicesUri).queryParam("wildcard","sys/tg_test/1");
         List<NamedEntity> result = client.target(uriBuilder.build()).request().get(new GenericType<List<NamedEntity>>(){});
 
-        Assert.assertFalse(result.isEmpty());
+        assertFalse(result.isEmpty());
         NamedEntity entity = Iterables.find(result, new Predicate<NamedEntity>() {
             @Override
             public boolean apply(@Nullable NamedEntity input) {
@@ -116,7 +116,7 @@ public class Rc5Test {
             }
         });
 
-        Assert.assertNotNull(entity);
+        assertNotNull(entity);
     }
 
     @Test
@@ -124,7 +124,7 @@ public class Rc5Test {
         List<NamedEntity> result = client.target(CONTEXT.devicesUri).request().get(new GenericType<List<NamedEntity>>() {
         });
 
-        Assert.assertTrue(Iterables.tryFind(result, new Predicate<NamedEntity>() {
+        assertTrue(Iterables.tryFind(result, new Predicate<NamedEntity>() {
             @Override
             public boolean apply(NamedEntity input) {
                 return input.name.equals(CONTEXT.SYS_TG_TEST_1);
@@ -136,7 +136,7 @@ public class Rc5Test {
     public void testTangoDeviceNotDefinedInDb(){
         Device result = client.target(UriBuilder.fromUri(CONTEXT.devicesUri).path("X/Y/Z").build()).request().get(Device.class);
 
-        Assert.fail();
+        fail();
     }
 
     @Test
@@ -144,10 +144,10 @@ public class Rc5Test {
         UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.uri).path("devices/tree").queryParam("host","localhost").queryParam("wildcard","sys/tg_test/1");
         List<org.tango.rest.rc5.tree.TangoHost> result = client.target(uriBuilder.build()).request().get(new GenericType<List<org.tango.rest.rc5.tree.TangoHost>>(){});
 
-        Assert.assertFalse(result.isEmpty());
-        Assert.assertTrue(result.get(0).isAlive);
-        Assert.assertEquals("aliases",result.get(0).data.get(0).value);
-        Assert.assertEquals("sys",result.get(0).data.get(1).value);
+        assertFalse(result.isEmpty());
+        assertTrue(result.get(0).isAlive);
+        assertEquals("aliases",result.get(0).data.get(0).value);
+        assertEquals("sys",result.get(0).data.get(1).value);
     }
 
     @Test
@@ -155,10 +155,10 @@ public class Rc5Test {
         UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.devicesUri).path("tree");
         List<org.tango.rest.rc5.tree.TangoHost> result = client.target(uriBuilder.build()).request().get(new GenericType<List<org.tango.rest.rc5.tree.TangoHost>>(){});
 
-        Assert.assertFalse(result.isEmpty());
-        Assert.assertTrue(result.get(0).isAlive);
-        Assert.assertEquals("aliases",result.get(0).data.get(0).value);
-        Assert.assertEquals("sys",result.get(0).data.get(1).value);
+        assertFalse(result.isEmpty());
+        assertTrue(result.get(0).isAlive);
+        assertEquals("aliases",result.get(0).data.get(0).value);
+        assertEquals("sys",result.get(0).data.get(1).value);
     }
 
     //TODO tree -- wrong Tango host e.g. port, host
@@ -175,7 +175,7 @@ public class Rc5Test {
             }
         });
 
-        Assert.assertNotNull(attribute);
+        assertNotNull(attribute);
     }
 
     @Test
@@ -190,7 +190,7 @@ public class Rc5Test {
             }
         });
 
-        Assert.assertEquals("RUNNING", attribute.value);
+        assertEquals("RUNNING", attribute.value);
     }
 
     @Test
@@ -209,7 +209,7 @@ public class Rc5Test {
             }
         });
 
-        Assert.assertEquals(3.14, attribute.value);
+        assertEquals(3.14, attribute.value);
     }
 
     @Test
@@ -228,7 +228,7 @@ public class Rc5Test {
             }
         });
 
-        Assert.assertSame(ErrSeverity.PANIC, attribute.errors[0].severity);
+        assertSame(ErrSeverity.PANIC, attribute.errors[0].severity);
     }
 
 
@@ -244,12 +244,12 @@ public class Rc5Test {
             }
         });
 
-        Assert.assertNotNull(command);
-        Assert.assertEquals("localhost:10000/sys/tg_test/1/Init", command.id);
-        Assert.assertEquals("Init", command.name);
-        Assert.assertEquals("sys/tg_test/1", command.device);
-        Assert.assertEquals("localhost:10000", command.host);
-        Assert.assertEquals("OPERATOR", command.info.level);
+        assertNotNull(command);
+        assertEquals("localhost:10000/sys/tg_test/1/Init", command.id);
+        assertEquals("Init", command.name);
+        assertEquals("sys/tg_test/1", command.device);
+        assertEquals("localhost:10000", command.host);
+        assertEquals("OPERATOR", command.info.level);
     }
 
     @Test
@@ -269,8 +269,8 @@ public class Rc5Test {
             }
         });
 
-        Assert.assertNotNull(command);
-        Assert.assertEquals("Hello World!", command.output);
+        assertNotNull(command);
+        assertEquals("Hello World!", command.output);
 
         command = Iterables.find(result, new Predicate<CommandInOut<?, ?>>() {
             @Override
@@ -279,8 +279,8 @@ public class Rc5Test {
             }
         });
 
-        Assert.assertNotNull(command);
-        Assert.assertEquals(3.14D, command.output);
+        assertNotNull(command);
+        assertEquals(3.14D, command.output);
     }
 
     @Test
@@ -295,7 +295,7 @@ public class Rc5Test {
             }
         });
 
-        Assert.assertNotNull(pipe);
+        assertNotNull(pipe);
     }
 
     @Test
@@ -310,7 +310,7 @@ public class Rc5Test {
             }
         });
 
-        Assert.assertNotNull(pipe);
+        assertNotNull(pipe);
     }
 
 
@@ -321,12 +321,12 @@ public class Rc5Test {
         Attribute attribute = client.target(CONTEXT.longScalarWUri)
                 .request().get(Attribute.class);
 
-        Assert.assertNotNull(attribute);
-        Assert.assertEquals("localhost:10000/sys/tg_test/1/long_scalar_w", attribute.id);
-        Assert.assertEquals("localhost:10000", attribute.host);
-        Assert.assertEquals("sys/tg_test/1", attribute.device);
-        Assert.assertEquals("long_scalar_w", attribute.name);
-        Assert.assertEquals("long_scalar_w", attribute.info.name);
+        assertNotNull(attribute);
+        assertEquals("localhost:10000/sys/tg_test/1/long_scalar_w", attribute.id);
+        assertEquals("localhost:10000", attribute.host);
+        assertEquals("sys/tg_test/1", attribute.device);
+        assertEquals("long_scalar_w", attribute.name);
+        assertEquals("long_scalar_w", attribute.info.name);
     }
 
     @Test(expected = NotFoundException.class)
@@ -335,7 +335,7 @@ public class Rc5Test {
         Attribute attribute = client.target(UriBuilder.fromUri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1)).path("attributes/XXXX")
                 .request().get(Attribute.class);
 
-        Assert.fail();
+        fail();
     }
 
 
@@ -347,24 +347,24 @@ public class Rc5Test {
         Device result = client.target(uri).request().get(Device.class);
 
         //just make sure we have all we need for further tests
-        Assert.assertEquals("sys/tg_test/1", result.name);
-        Assert.assertEquals(new ResteasyUriBuilder().uri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1).path("attributes").build().toString(), result.attributes);
-        Assert.assertEquals(new ResteasyUriBuilder().uri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1).path("commands").build().toString(), result.commands);
-        Assert.assertEquals(new ResteasyUriBuilder().uri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1).path("pipes").build().toString(), result.pipes);
-        Assert.assertEquals(new ResteasyUriBuilder().uri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1).path("properties").build().toString(), result.properties);
-        Assert.assertEquals(new ResteasyUriBuilder().uri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1).path("state").build().toString(), result.state);
+        assertEquals("sys/tg_test/1", result.name);
+        assertEquals(new ResteasyUriBuilder().uri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1).path("attributes").build().toString(), result.attributes);
+        assertEquals(new ResteasyUriBuilder().uri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1).path("commands").build().toString(), result.commands);
+        assertEquals(new ResteasyUriBuilder().uri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1).path("pipes").build().toString(), result.pipes);
+        assertEquals(new ResteasyUriBuilder().uri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1).path("properties").build().toString(), result.properties);
+        assertEquals(new ResteasyUriBuilder().uri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1).path("state").build().toString(), result.state);
 
         DeviceInfo info = result.info;
-        Assert.assertNotNull(info.ior);
-        Assert.assertFalse(info.is_taco);
-        Assert.assertTrue(info.exported);
-        Assert.assertNotNull(info.last_exported);
-        Assert.assertNotNull(info.last_unexported);
-        Assert.assertEquals("sys/tg_test/1", info.name);
-        Assert.assertEquals("unknown", info.classname);
-        Assert.assertNotNull(info.version);
-        Assert.assertEquals("TangoTest/test", info.server);
-        Assert.assertNotNull(info.hostname);
+        assertNotNull(info.ior);
+        assertFalse(info.is_taco);
+        assertTrue(info.exported);
+        assertNotNull(info.last_exported);
+        assertNotNull(info.last_unexported);
+        assertEquals("sys/tg_test/1", info.name);
+        assertEquals("unknown", info.classname);
+        assertNotNull(info.version);
+        assertEquals("TangoTest/test", info.server);
+        assertNotNull(info.hostname);
     }
 
     @Test
@@ -381,7 +381,7 @@ public class Rc5Test {
             }
         });
 
-        Assert.assertNotNull(attribute);
+        assertNotNull(attribute);
     }
 
     @Test
@@ -391,7 +391,7 @@ public class Rc5Test {
                 .request().put(null, new GenericType<AttributeValue<Integer>>() {
                 });
 
-        Assert.assertEquals(123456, result.value.intValue());
+        assertEquals(123456, result.value.intValue());
     }
 
     @Test
@@ -401,7 +401,7 @@ public class Rc5Test {
 
                 .request().header("Accept", MediaType.TEXT_PLAIN).get(int.class);
 
-        Assert.assertEquals(123456, value);
+        assertEquals(123456, value);
     }
 
     @Test
@@ -411,7 +411,7 @@ public class Rc5Test {
 
                 .request().header("Accept", "image/jpeg").get(String.class);
 
-        Assert.assertTrue(value.startsWith("data:/jpeg;base64"));
+        assertTrue(value.startsWith("data:/jpeg;base64"));
     }
 
     @Test(expected = javax.ws.rs.BadRequestException.class)
@@ -421,7 +421,7 @@ public class Rc5Test {
 
                 .request().header("Accept", "image/jpeg").get(String.class);
 
-        Assert.fail();
+        fail();
     }
 
     @Test
@@ -431,7 +431,7 @@ public class Rc5Test {
                 .request().put(null, new GenericType<AttributeValue<Integer>>() {
                 });
 
-        Assert.assertNull(result);
+        assertNull(result);
     }
 
     @Test
@@ -442,7 +442,7 @@ public class Rc5Test {
                 .request().put(null, new GenericType<AttributeValue<double[]>>() {
                 });
 
-        Assert.assertArrayEquals(new double[]{3.14,2.87,1.44},result.value, 0.0);
+        assertArrayEquals(new double[]{3.14,2.87,1.44},result.value, 0.0);
     }
 
     @Test(expected = NotFoundException.class)
@@ -453,7 +453,7 @@ public class Rc5Test {
                 .request().put(null, new GenericType<AttributeValue<double[]>>() {
                 });
 
-        Assert.fail();
+        fail();
     }
 
     @Test
@@ -465,11 +465,11 @@ public class Rc5Test {
                 .request().get(Command.class);
 
 
-        Assert.assertEquals("localhost:10000/sys/tg_test/1/DevString", cmd.id);
-        Assert.assertEquals("DevString", cmd.name);
-        Assert.assertEquals("sys/tg_test/1", cmd.device);
-        Assert.assertEquals("localhost:10000", cmd.host);
-        Assert.assertEquals("OPERATOR", cmd.info.level);
+        assertEquals("localhost:10000/sys/tg_test/1/DevString", cmd.id);
+        assertEquals("DevString", cmd.name);
+        assertEquals("sys/tg_test/1", cmd.device);
+        assertEquals("localhost:10000", cmd.host);
+        assertEquals("OPERATOR", cmd.info.level);
     }
 
     @Test(expected = NotFoundException.class)
@@ -481,7 +481,7 @@ public class Rc5Test {
                 .request().get(Command.class);
 
 
-        Assert.fail();
+        fail();
     }
 
     @Test
@@ -499,7 +499,7 @@ public class Rc5Test {
                         new GenericType<CommandInOut<String, String>>() {
                 });
 
-        Assert.assertEquals("Hello World!!!", result.output);
+        assertEquals("Hello World!!!", result.output);
     }
 
 //    @Test
@@ -516,7 +516,7 @@ public class Rc5Test {
                         Entity.entity(input, MediaType.APPLICATION_JSON_TYPE),
                         String.class);
 
-        Assert.assertEquals("Hello World!!!", result);
+        assertEquals("Hello World!!!", result);
     }
 
     //TODO properties
@@ -539,7 +539,7 @@ public class Rc5Test {
             }
         });
 
-        Assert.assertNotNull(pipe);
+        assertNotNull(pipe);
     }
 
     @Test
@@ -551,7 +551,7 @@ public class Rc5Test {
 //                .header("Accept", MediaType.APPLICATION_JSON)
                 .get(Pipe.class);
 
-        Assert.assertNotNull(result);
+        assertNotNull(result);
     }
 
     @Test
@@ -563,17 +563,17 @@ public class Rc5Test {
 //                .header("Accept", MediaType.APPLICATION_JSON)
                 .get(PipeValue.class);
 
-        Assert.assertNotNull(result);
-        Assert.assertEquals(CONTEXT.tango_host + ":" + CONTEXT.tango_port, result.host);
-        Assert.assertEquals("sys/tg_test/1", result.device);
-        Assert.assertEquals("string_long_short_ro", result.name);
-        Assert.assertNotNull(result.data);
-        Assert.assertEquals("FirstDE", result.data.get(0).name);
-        Assert.assertArrayEquals(new String[]{"The string"}, result.data.get(0).value.toArray());
-        Assert.assertEquals("SecondDE", result.data.get(1).name);
-        Assert.assertArrayEquals(new int[]{666}, Ints.toArray((List<Integer>)result.data.get(1).value));
-        Assert.assertEquals("ThirdDE", result.data.get(2).name);
-        Assert.assertArrayEquals(new int[]{12}, Ints.toArray((List<Integer>)result.data.get(2).value));
+        assertNotNull(result);
+        assertEquals(CONTEXT.tango_host + ":" + CONTEXT.tango_port, result.host);
+        assertEquals("sys/tg_test/1", result.device);
+        assertEquals("string_long_short_ro", result.name);
+        assertNotNull(result.data);
+        assertEquals("FirstDE", result.data.get(0).name);
+        assertArrayEquals(new String[]{"The string"}, result.data.get(0).value.toArray());
+        assertEquals("SecondDE", result.data.get(1).name);
+        assertArrayEquals(new int[]{666}, Ints.toArray((List<Integer>)result.data.get(1).value));
+        assertEquals("ThirdDE", result.data.get(2).name);
+        assertArrayEquals(new int[]{12}, Ints.toArray((List<Integer>)result.data.get(2).value));
     }
 
     //TODO writable Pipe in TangoTest
@@ -588,7 +588,7 @@ public class Rc5Test {
                         new PipeBlobBuilder("blob1").add("FirstDE", "Hello World!").build()
                         ,MediaType.APPLICATION_JSON),PipeValue.class);
 
-        Assert.assertNotNull(result);
+        assertNotNull(result);
     }
 
 
@@ -601,7 +601,7 @@ public class Rc5Test {
         List<Attribute> result = client.target(uri).request().get(new GenericType<List<Attribute>>() {
         });
 
-        Assert.assertTrue(result.size() == 5);
+        assertTrue(result.size() == 5);
     }
 
     @Test(expected = ClientErrorException.class)
@@ -611,7 +611,7 @@ public class Rc5Test {
         List<Attribute> result = client.target(uri).request().get(new GenericType<List<Attribute>>() {
         });
 
-        Assert.fail();
+        fail();
     }
 
     @Test
@@ -622,12 +622,12 @@ public class Rc5Test {
                 .request().get(Attribute.class);
 
 
-        Assert.assertNotNull(result);
-        Assert.assertEquals("long_scalar_w", result.name);
-        Assert.assertNull(result.value);
-        Assert.assertNotNull(result.info);
-        Assert.assertEquals("long_scalar_w", result.info.name);
-        Assert.assertNull(result.info.label);
+        assertNotNull(result);
+        assertEquals("long_scalar_w", result.name);
+        assertNull(result.value);
+        assertNotNull(result.info);
+        assertEquals("long_scalar_w", result.info.name);
+        assertNull(result.info.label);
     }
 
     @Test
@@ -638,9 +638,9 @@ public class Rc5Test {
                 .request().get(PipeValue.class);
 
 
-        Assert.assertNotNull(result);
-        Assert.assertEquals("string_long_short_ro", result.name);
-        Assert.assertNull(result.data);
+        assertNotNull(result);
+        assertEquals("string_long_short_ro", result.name);
+        assertNull(result.data);
     }
 
     @Test
@@ -650,8 +650,8 @@ public class Rc5Test {
         Attribute result = client.target(uri)
                 .request().get(Attribute.class);
 
-        Assert.assertNull(result.name);
-        Assert.assertNotNull(result.value);
+        assertNull(result.name);
+        assertNotNull(result.value);
     }
 
     @Test(expected = BadRequestException.class)
@@ -670,11 +670,11 @@ public class Rc5Test {
         AttributeInfo result = client.target(uri)
                 .request().get(AttributeInfo.class);
 
-        Assert.assertNotNull(result);
-        Assert.assertEquals("long_scalar_w", result.name);
-        Assert.assertEquals("WRITE", result.writable);
-        Assert.assertEquals("SCALAR", result.data_format);
-        Assert.assertEquals("OPERATOR", result.level);
+        assertNotNull(result);
+        assertEquals("long_scalar_w", result.name);
+        assertEquals("WRITE", result.writable);
+        assertEquals("SCALAR", result.data_format);
+        assertEquals("OPERATOR", result.level);
     }
 
     @Test
@@ -690,7 +690,7 @@ public class Rc5Test {
         AttributeInfo result = client.target(uri)
                 .request().put(Entity.entity(info, MediaType.APPLICATION_JSON_TYPE), AttributeInfo.class);
 
-        Assert.assertEquals("1000", result.alarms.max_alarm);
-        Assert.assertEquals("100", result.events.ch_event.rel_change);
+        assertEquals("1000", result.alarms.max_alarm);
+        assertEquals("100", result.events.ch_event.rel_change);
     }
 }
