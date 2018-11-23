@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.tango.rest.rc4.ClientHelper;
 import org.tango.rest.rc4.entities.*;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
@@ -255,7 +256,7 @@ public class Rc4Test {
         assertNotNull(result.value);
     }
 
-    @Test(expected = InternalServerErrorException.class)//HTTP 500
+    @Test(expected = BadRequestException.class)//HTTP 400
     public void testNoValue(){
         URI uri = UriBuilder.fromUri(devicesUri).path(SYS_TG_TEST_1).path("attributes").path("no_value").path("value").build();
 
