@@ -157,8 +157,9 @@ public class Rc5Test {
 
         assertFalse(result.isEmpty());
         assertTrue(result.get(0).isAlive);
-        assertEquals("aliases",result.get(0).data.get(0).value);
-        assertEquals("sys",result.get(0).data.get(1).value);
+
+        assertNotNull(result.get(0).data.stream().filter(tangoContainer -> "aliases".equalsIgnoreCase(tangoContainer.value)).findFirst().get());
+        assertNotNull(result.get(0).data.stream().filter(tangoContainer -> "sys".equalsIgnoreCase(tangoContainer.value)).findFirst().get());
     }
 
     //TODO tree -- wrong Tango host e.g. port, host
