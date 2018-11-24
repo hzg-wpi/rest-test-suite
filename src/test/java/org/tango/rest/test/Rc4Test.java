@@ -7,7 +7,7 @@ import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.tango.rest.rc4.ClientHelper;
+import org.tango.rest.test.rc4.ClientHelper;
 import org.tango.rest.rc4.entities.*;
 
 import javax.ws.rs.BadRequestException;

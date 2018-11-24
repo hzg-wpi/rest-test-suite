@@ -5,16 +5,15 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
 import fr.esrf.Tango.ErrSeverity;
-import fr.esrf.TangoApi.PipeBlob;
 import fr.esrf.TangoApi.PipeBlobBuilder;
 import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.tango.rest.rc5.ClientHelper;
-import org.tango.rest.rc5.entities.*;
-import org.tango.rest.rc5.entities.pipe.Pipe;
-import org.tango.rest.rc5.entities.pipe.PipeValue;
+import org.tango.rest.test.v10.ClientHelper;
+import org.tango.rest.v10.entities.*;
+import org.tango.rest.v10.entities.pipe.Pipe;
+import org.tango.rest.v10.entities.pipe.PipeValue;
 
 import javax.annotation.Nullable;
 import javax.ws.rs.BadRequestException;
@@ -38,7 +37,7 @@ import static org.junit.Assert.assertNull;
  * @author Igor Khokhriakov <igor.khokhriakov@hzg.de>
  * @since 17.12.2015
  */
-public class Rc5Test {
+public class V10Test {
     public static final String REST_API_VERSION = "rc5";
     private static Context CONTEXT;
     private Client client;
@@ -142,7 +141,7 @@ public class Rc5Test {
     @Test
     public void testDevicesTree(){
         UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.uri).path("devices/tree").queryParam("host","localhost").queryParam("wildcard","sys/tg_test/1");
-        List<org.tango.rest.rc5.tree.TangoHost> result = client.target(uriBuilder.build()).request().get(new GenericType<List<org.tango.rest.rc5.tree.TangoHost>>(){});
+        List<org.tango.rest.v10.tree.TangoHost> result = client.target(uriBuilder.build()).request().get(new GenericType<List<org.tango.rest.v10.tree.TangoHost>>(){});
 
         assertFalse(result.isEmpty());
         assertTrue(result.get(0).isAlive);
@@ -153,7 +152,7 @@ public class Rc5Test {
     @Test
     public void testDevicesTreeForLocalhost(){
         UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.devicesUri).path("tree");
-        List<org.tango.rest.rc5.tree.TangoHost> result = client.target(uriBuilder.build()).request().get(new GenericType<List<org.tango.rest.rc5.tree.TangoHost>>(){});
+        List<org.tango.rest.v10.tree.TangoHost> result = client.target(uriBuilder.build()).request().get(new GenericType<List<org.tango.rest.v10.tree.TangoHost>>(){});
 
         assertFalse(result.isEmpty());
         assertTrue(result.get(0).isAlive);
