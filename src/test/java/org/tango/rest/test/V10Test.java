@@ -38,7 +38,7 @@ import static org.junit.Assert.assertNull;
  * @since 17.12.2015
  */
 public class V10Test {
-    public static final String REST_API_VERSION = "rc5";
+    public static final String REST_API_VERSION = "v10";
     private static Context CONTEXT;
     private Client client;
 
