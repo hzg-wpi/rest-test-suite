@@ -14,6 +14,8 @@ import org.tango.rest.test.v10.ClientHelper;
 import org.tango.rest.v10.entities.*;
 import org.tango.rest.v10.entities.pipe.Pipe;
 import org.tango.rest.v10.entities.pipe.PipeValue;
+import org.tango.rest.v10.event.Event;
+import org.tango.rest.v10.event.Subscription;
 
 import javax.annotation.Nullable;
 import javax.ws.rs.BadRequestException;
@@ -21,13 +23,17 @@ import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.sse.SseEventSource;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertFalse;
@@ -43,24 +49,24 @@ public class V10Test {
     private Client client;
 
     @BeforeClass
-    public static void beforeClass(){
+    public static void beforeClass() {
         CONTEXT = Context.create(REST_API_VERSION);
     }
 
     @Before
-    public void before(){
+    public void before() {
         client = ClientHelper.initializeClientWithBasicAuthentication(CONTEXT.url, CONTEXT.user, CONTEXT.password);
     }
 
     @Test
-    public void testVersion(){
-        Map<String,String> result = client.target(CONTEXT.url).request().get(HashMap.class);
+    public void testVersion() {
+        Map<String, String> result = client.target(CONTEXT.url).request().get(HashMap.class);
 
         assertTrue(result.containsKey(REST_API_VERSION));
     }
 
     @Test
-    public void testHost(){
+    public void testHost() {
         UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.uri).path("hosts/localhost;port=10000");
         TangoHost result = client.target(uriBuilder.build()).request().get(TangoHost.class);
 
@@ -71,7 +77,7 @@ public class V10Test {
     }
 
     @Test(expected = BadRequestException.class)
-    public void testHost_wrongPort(){
+    public void testHost_wrongPort() {
         UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.uri).path("hosts/localhost;port=12345");
         TangoHost result = client.target(uriBuilder.build()).request().get(TangoHost.class);
 
@@ -79,7 +85,7 @@ public class V10Test {
     }
 
     @Test(expected = NotFoundException.class)
-    public void testHost_nonExistingHost(){
+    public void testHost_nonExistingHost() {
         UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.uri).path("hosts/XXXX");
         TangoHost result = client.target(uriBuilder.build()).request().get(TangoHost.class);
 
@@ -87,9 +93,10 @@ public class V10Test {
     }
 
     @Test
-    public void testTangoHostDevicesWith(){
+    public void testTangoHostDevicesWith() {
         UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.devicesUri);
-        List<NamedEntity> result = client.target(uriBuilder.build()).request().get(new GenericType<List<NamedEntity>>(){});
+        List<NamedEntity> result = client.target(uriBuilder.build()).request().get(new GenericType<List<NamedEntity>>() {
+        });
 
         assertFalse(result.isEmpty());
         NamedEntity entity = Iterables.find(result, new Predicate<NamedEntity>() {
@@ -103,9 +110,10 @@ public class V10Test {
     }
 
     @Test
-    public void testTangoHostDevicesWithWildCard(){
-        UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.devicesUri).queryParam("wildcard","sys/tg_test/1");
-        List<NamedEntity> result = client.target(uriBuilder.build()).request().get(new GenericType<List<NamedEntity>>(){});
+    public void testTangoHostDevicesWithWildCard() {
+        UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.devicesUri).queryParam("wildcard", "sys/tg_test/1");
+        List<NamedEntity> result = client.target(uriBuilder.build()).request().get(new GenericType<List<NamedEntity>>() {
+        });
 
         assertFalse(result.isEmpty());
         NamedEntity entity = Iterables.find(result, new Predicate<NamedEntity>() {
@@ -119,7 +127,7 @@ public class V10Test {
     }
 
     @Test
-    public void testTangoTestIsPresent(){
+    public void testTangoTestIsPresent() {
         List<NamedEntity> result = client.target(CONTEXT.devicesUri).request().get(new GenericType<List<NamedEntity>>() {
         });
 
@@ -132,27 +140,29 @@ public class V10Test {
     }
 
     @Test(expected = NotFoundException.class)
-    public void testTangoDeviceNotDefinedInDb(){
+    public void testTangoDeviceNotDefinedInDb() {
         Device result = client.target(UriBuilder.fromUri(CONTEXT.devicesUri).path("X/Y/Z").build()).request().get(Device.class);
 
         fail();
     }
 
     @Test
-    public void testDevicesTree(){
-        UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.uri).path("devices/tree").queryParam("host","localhost").queryParam("wildcard","sys/tg_test/1");
-        List<org.tango.rest.v10.tree.TangoHost> result = client.target(uriBuilder.build()).request().get(new GenericType<List<org.tango.rest.v10.tree.TangoHost>>(){});
+    public void testDevicesTree() {
+        UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.uri).path("devices/tree").queryParam("host", "localhost").queryParam("wildcard", "sys/tg_test/1");
+        List<org.tango.rest.v10.tree.TangoHost> result = client.target(uriBuilder.build()).request().get(new GenericType<List<org.tango.rest.v10.tree.TangoHost>>() {
+        });
 
         assertFalse(result.isEmpty());
         assertTrue(result.get(0).isAlive);
-        assertEquals("aliases",result.get(0).data.get(0).value);
-        assertEquals("sys",result.get(0).data.get(1).value);
+        assertEquals("aliases", result.get(0).data.get(0).value);
+        assertEquals("sys", result.get(0).data.get(1).value);
     }
 
     @Test
-    public void testDevicesTreeForLocalhost(){
+    public void testDevicesTreeForLocalhost() {
         UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.devicesUri).path("tree");
-        List<org.tango.rest.v10.tree.TangoHost> result = client.target(uriBuilder.build()).request().get(new GenericType<List<org.tango.rest.v10.tree.TangoHost>>(){});
+        List<org.tango.rest.v10.tree.TangoHost> result = client.target(uriBuilder.build()).request().get(new GenericType<List<org.tango.rest.v10.tree.TangoHost>>() {
+        });
 
         assertFalse(result.isEmpty());
         assertTrue(result.get(0).isAlive);
@@ -164,9 +174,10 @@ public class V10Test {
     //TODO tree -- wrong Tango host e.g. port, host
 
     @Test
-    public void testAttributes(){
+    public void testAttributes() {
         UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.uri).path("attributes").queryParam("wildcard", "localhost:10000/*/*/*/State");
-        List<Attribute> result = client.target(uriBuilder.build()).request().get(new GenericType<List<Attribute>>(){});
+        List<Attribute> result = client.target(uriBuilder.build()).request().get(new GenericType<List<Attribute>>() {
+        });
 
         Attribute attribute = Iterables.find(result, new Predicate<Attribute>() {
             @Override
@@ -179,9 +190,10 @@ public class V10Test {
     }
 
     @Test
-    public void testAttributeValuesRead(){
+    public void testAttributeValuesRead() {
         UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.uri).path("attributes/value").queryParam("wildcard", "localhost:10000/*/*/*/State");
-        List<AttributeValue> result = client.target(uriBuilder.build()).request().get(new GenericType<List<AttributeValue>>(){});
+        List<AttributeValue> result = client.target(uriBuilder.build()).request().get(new GenericType<List<AttributeValue>>() {
+        });
 
         AttributeValue attribute = Iterables.find(result, new Predicate<AttributeValue>() {
             @Override
@@ -194,13 +206,14 @@ public class V10Test {
     }
 
     @Test
-    public void testAttributeValuesWrite(){
+    public void testAttributeValuesWrite() {
         UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.uri).path("attributes/value");
         List<AttributeValue> result = client.target(uriBuilder.build()).request().put(
                 Entity.entity(Lists.<AttributeValue>newArrayList(
-                    new AttributeValue<>("double_scalar_w","localhost:10000","sys/tg_test/1",3.14D,null,0L)
-                ),MediaType.APPLICATION_JSON_TYPE),
-                new GenericType<List<AttributeValue>>(){});
+                        new AttributeValue<>("double_scalar_w", "localhost:10000", "sys/tg_test/1", 3.14D, null, 0L)
+                ), MediaType.APPLICATION_JSON_TYPE),
+                new GenericType<List<AttributeValue>>() {
+                });
 
         AttributeValue attribute = Iterables.find(result, new Predicate<AttributeValue>() {
             @Override
@@ -213,13 +226,14 @@ public class V10Test {
     }
 
     @Test
-    public void testAttributeValuesWrite_wrongValueType(){
+    public void testAttributeValuesWrite_wrongValueType() {
         UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.uri).path("attributes/value");
         List<AttributeValue> result = client.target(uriBuilder.build()).request().put(
                 Entity.entity(Lists.<AttributeValue>newArrayList(
-                        new AttributeValue<>("double_scalar_w","localhost:10000","sys/tg_test/1","Hello World!",null,0L)
-                ),MediaType.APPLICATION_JSON_TYPE),
-                new GenericType<List<AttributeValue>>(){});
+                        new AttributeValue<>("double_scalar_w", "localhost:10000", "sys/tg_test/1", "Hello World!", null, 0L)
+                ), MediaType.APPLICATION_JSON_TYPE),
+                new GenericType<List<AttributeValue>>() {
+                });
 
         AttributeValue attribute = Iterables.find(result, new Predicate<AttributeValue>() {
             @Override
@@ -233,9 +247,10 @@ public class V10Test {
 
 
     @Test
-    public void testCommands(){
+    public void testCommands() {
         UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.uri).path("commands").queryParam("wildcard", "localhost:10000/*/*/*/init");
-        List<Command> result = client.target(uriBuilder.build()).request().get(new GenericType<List<Command>>(){});
+        List<Command> result = client.target(uriBuilder.build()).request().get(new GenericType<List<Command>>() {
+        });
 
         Command command = Iterables.find(result, new Predicate<Command>() {
             @Override
@@ -253,14 +268,15 @@ public class V10Test {
     }
 
     @Test
-    public void testCommands_execute(){
+    public void testCommands_execute() {
         UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.uri).path("commands");
-        List<CommandInOut<?,?>> result = client.target(uriBuilder.build()).request().put(
-                Entity.entity(Lists.<CommandInOut<?,?>>newArrayList(
-                        new CommandInOut<Double,Double>("localhost:10000","sys/tg_test/1","DevDouble",3.14D),
-                        new CommandInOut<String,String>("localhost:10000","sys/tg_test/1","DevString","Hello World!")
-                ),MediaType.APPLICATION_JSON_TYPE)
-                ,new GenericType<List<CommandInOut<?,?>>>(){});
+        List<CommandInOut<?, ?>> result = client.target(uriBuilder.build()).request().put(
+                Entity.entity(Lists.<CommandInOut<?, ?>>newArrayList(
+                        new CommandInOut<Double, Double>("localhost:10000", "sys/tg_test/1", "DevDouble", 3.14D),
+                        new CommandInOut<String, String>("localhost:10000", "sys/tg_test/1", "DevString", "Hello World!")
+                ), MediaType.APPLICATION_JSON_TYPE)
+                , new GenericType<List<CommandInOut<?, ?>>>() {
+                });
 
         CommandInOut<?, ?> command = Iterables.find(result, new Predicate<CommandInOut<?, ?>>() {
             @Override
@@ -284,9 +300,10 @@ public class V10Test {
     }
 
     @Test
-    public void testPipes(){
-        UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.uri).path("pipes").queryParam("wildcard", CONTEXT.tango_host + ":" +CONTEXT.tango_port + "/*/*/*/string_long_short_ro");
-        List<Pipe> result = client.target(uriBuilder.build()).request().get(new GenericType<List<Pipe>>(){});
+    public void testPipes() {
+        UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.uri).path("pipes").queryParam("wildcard", CONTEXT.tango_host + ":" + CONTEXT.tango_port + "/*/*/*/string_long_short_ro");
+        List<Pipe> result = client.target(uriBuilder.build()).request().get(new GenericType<List<Pipe>>() {
+        });
 
         Pipe pipe = Iterables.find(result, new Predicate<Pipe>() {
             @Override
@@ -299,9 +316,10 @@ public class V10Test {
     }
 
     @Test
-    public void testPipesValue(){
-        UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.uri).path("pipes/value").queryParam("wildcard", CONTEXT.tango_host + ":" +CONTEXT.tango_port + "/*/*/*/string_long_short_ro");
-        List<PipeValue> result = client.target(uriBuilder.build()).request().get(new GenericType<List<PipeValue>>(){});
+    public void testPipesValue() {
+        UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.uri).path("pipes/value").queryParam("wildcard", CONTEXT.tango_host + ":" + CONTEXT.tango_port + "/*/*/*/string_long_short_ro");
+        List<PipeValue> result = client.target(uriBuilder.build()).request().get(new GenericType<List<PipeValue>>() {
+        });
 
         PipeValue pipe = Iterables.find(result, new Predicate<PipeValue>() {
             @Override
@@ -314,9 +332,8 @@ public class V10Test {
     }
 
 
-
     @Test
-    public void testAttribute(){
+    public void testAttribute() {
         //again if this one does not fail test passes
         Attribute attribute = client.target(CONTEXT.longScalarWUri)
                 .request().get(Attribute.class);
@@ -330,7 +347,7 @@ public class V10Test {
     }
 
     @Test(expected = NotFoundException.class)
-    public void testAttribute_notFound(){
+    public void testAttribute_notFound() {
         //again if this one does not fail test passes
         Attribute attribute = client.target(UriBuilder.fromUri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1)).path("attributes/XXXX")
                 .request().get(Attribute.class);
@@ -372,7 +389,8 @@ public class V10Test {
         //if it does not fail with deserialization exception response confronts API spec
         UriBuilder uriBuilder = new ResteasyUriBuilder().uri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1).path("attributes");
         URI uri = uriBuilder.build();
-        List<Attribute> result = client.target(uri).request().get(new GenericType<List<Attribute>>(){});
+        List<Attribute> result = client.target(uri).request().get(new GenericType<List<Attribute>>() {
+        });
 
         Attribute attribute = Iterables.find(result, new Predicate<Attribute>() {
             @Override
@@ -385,7 +403,7 @@ public class V10Test {
     }
 
     @Test
-    public void testWriteReadAttribute(){
+    public void testWriteReadAttribute() {
         URI uri = UriBuilder.fromUri(CONTEXT.longScalarWUri).path("value").queryParam("v", "123456").build();
         AttributeValue<Integer> result = client.target(uri)
                 .request().put(null, new GenericType<AttributeValue<Integer>>() {
@@ -395,7 +413,7 @@ public class V10Test {
     }
 
     @Test
-    public void testAttributeValuePlain(){
+    public void testAttributeValuePlain() {
         //again if this one does not fail test passes
         int value = client.target(CONTEXT.longScalarWUri).path("value")
 
@@ -405,7 +423,7 @@ public class V10Test {
     }
 
     @Test
-    public void testAttributeValueImage(){
+    public void testAttributeValueImage() {
         //again if this one does not fail test passes
         String value = client.target(CONTEXT.uShortImageRO).path("value")
 
@@ -415,7 +433,7 @@ public class V10Test {
     }
 
     @Test(expected = javax.ws.rs.BadRequestException.class)
-    public void testAttributeValueImage_nonImageAttribute(){
+    public void testAttributeValueImage_nonImageAttribute() {
         //again if this one does not fail test passes
         String value = client.target(CONTEXT.longScalarWUri).path("value")
 
@@ -425,7 +443,7 @@ public class V10Test {
     }
 
     @Test
-    public void testWriteAttributeAsync(){
+    public void testWriteAttributeAsync() {
         URI uri = UriBuilder.fromUri(CONTEXT.longScalarWUri).path("value").queryParam("v", 123456).queryParam("async", true).build();
         AttributeValue<Integer> result = client.target(uri)
                 .request().put(null, new GenericType<AttributeValue<Integer>>() {
@@ -435,18 +453,18 @@ public class V10Test {
     }
 
     @Test
-    public void testWriteReadSpectrum(){
+    public void testWriteReadSpectrum() {
         URI uri = UriBuilder.fromUri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1).path("attributes").path("double_spectrum").path("value").queryParam("v", "3.14,2.87,1.44").build();//TODO native array does not work
 
         AttributeValue<double[]> result = client.target(uri)
                 .request().put(null, new GenericType<AttributeValue<double[]>>() {
                 });
 
-        assertArrayEquals(new double[]{3.14,2.87,1.44},result.value, 0.0);
+        assertArrayEquals(new double[]{3.14, 2.87, 1.44}, result.value, 0.0);
     }
 
     @Test(expected = NotFoundException.class)
-    public void testWriteAttribute_doesNotExists(){
+    public void testWriteAttribute_doesNotExists() {
         URI uri = UriBuilder.fromUri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1).path("attributes").path("XXX").path("value").queryParam("v", "3.14,2.87,1.44").build();//TODO native array does not work
 
         AttributeValue<double[]> result = client.target(uri)
@@ -457,7 +475,7 @@ public class V10Test {
     }
 
     @Test
-    public void testCommand(){
+    public void testCommand() {
         URI uri = UriBuilder.fromUri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1).path("commands").path("DevString").build();
 
         //if parsed w/o exception consider test has passed
@@ -473,7 +491,7 @@ public class V10Test {
     }
 
     @Test(expected = NotFoundException.class)
-    public void testCommand_NotFound(){
+    public void testCommand_NotFound() {
         URI uri = UriBuilder.fromUri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1).path("commands").path("XXXX").build();
 
         //if parsed w/o exception consider test has passed
@@ -485,25 +503,25 @@ public class V10Test {
     }
 
     @Test
-    public void testExecuteCommand(){
+    public void testExecuteCommand() {
         URI uri = UriBuilder.fromUri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1).path("commands").path("DevString").build();
 
         CommandInOut<String, String> input = new CommandInOut<>();
         input.input = "Hello World!!!";
 
-        CommandInOut<String,String> result = client.target(uri)
+        CommandInOut<String, String> result = client.target(uri)
                 .request()
 //                .header("Accept", MediaType.APPLICATION_JSON)
                 .put(
                         Entity.entity(input, MediaType.APPLICATION_JSON_TYPE),
                         new GenericType<CommandInOut<String, String>>() {
-                });
+                        });
 
         assertEquals("Hello World!!!", result.output);
     }
 
-//    @Test
-    public void testExecuteCommand_AcceptPlain(){
+    //    @Test
+    public void testExecuteCommand_AcceptPlain() {
         URI uri = UriBuilder.fromUri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1).path("commands").path("DevString").build();
 
         CommandInOut<String, String> input = new CommandInOut<>();
@@ -522,7 +540,7 @@ public class V10Test {
     //TODO properties
 
     @Test
-    public void testDevicePipes(){
+    public void testDevicePipes() {
         URI uri = UriBuilder.fromUri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1).path("pipes").build();
 
         List<NamedEntity> result = client.target(uri)
@@ -543,7 +561,7 @@ public class V10Test {
     }
 
     @Test
-    public void testDevicePipe(){
+    public void testDevicePipe() {
         URI uri = UriBuilder.fromUri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1).path("pipes/string_long_short_ro").build();
 
         Pipe result = client.target(uri)
@@ -555,7 +573,7 @@ public class V10Test {
     }
 
     @Test
-    public void testDevicePipeValueRead(){
+    public void testDevicePipeValueRead() {
         URI uri = UriBuilder.fromUri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1).path("pipes/string_long_short_ro/value").build();
 
         PipeValue result = client.target(uri)
@@ -571,14 +589,14 @@ public class V10Test {
         assertEquals("FirstDE", result.data.get(0).name);
         assertArrayEquals(new String[]{"The string"}, result.data.get(0).value.toArray());
         assertEquals("SecondDE", result.data.get(1).name);
-        assertArrayEquals(new int[]{666}, Ints.toArray((List<Integer>)result.data.get(1).value));
+        assertArrayEquals(new int[]{666}, Ints.toArray((List<Integer>) result.data.get(1).value));
         assertEquals("ThirdDE", result.data.get(2).name);
-        assertArrayEquals(new int[]{12}, Ints.toArray((List<Integer>)result.data.get(2).value));
+        assertArrayEquals(new int[]{12}, Ints.toArray((List<Integer>) result.data.get(2).value));
     }
 
     //TODO writable Pipe in TangoTest
     @Test(expected = BadRequestException.class)
-    public void testDevicePipeValueWrite(){
+    public void testDevicePipeValueWrite() {
         URI uri = UriBuilder.fromUri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1).path("pipes/string_long_short_ro/value").build();
 
         PipeValue result = client.target(uri)
@@ -586,7 +604,7 @@ public class V10Test {
 //                .header("Accept", MediaType.APPLICATION_JSON)
                 .put(Entity.entity(
                         new PipeBlobBuilder("blob1").add("FirstDE", "Hello World!").build()
-                        ,MediaType.APPLICATION_JSON),PipeValue.class);
+                        , MediaType.APPLICATION_JSON), PipeValue.class);
 
         assertNotNull(result);
     }
@@ -595,7 +613,7 @@ public class V10Test {
     //TODO events
 
     @Test
-    public void testPartitioning(){
+    public void testPartitioning() {
         URI uri = UriBuilder.fromUri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1).path("attributes").queryParam("range", "5-10").build();
 
         List<Attribute> result = client.target(uri).request().get(new GenericType<List<Attribute>>() {
@@ -605,7 +623,7 @@ public class V10Test {
     }
 
     @Test(expected = ClientErrorException.class)
-    public void testPartitioning_wrongRange(){
+    public void testPartitioning_wrongRange() {
         URI uri = UriBuilder.fromUri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1).path("attributes").queryParam("range", "XXX").build();
 
         List<Attribute> result = client.target(uri).request().get(new GenericType<List<Attribute>>() {
@@ -615,7 +633,7 @@ public class V10Test {
     }
 
     @Test
-    public void testFilteringAttribute(){
+    public void testFilteringAttribute() {
         URI uri = UriBuilder.fromUri(CONTEXT.longScalarWUri).queryParam("filter", "name").build();
 
         Attribute result = client.target(uri)
@@ -631,8 +649,8 @@ public class V10Test {
     }
 
     @Test
-    public void testFilteringPipeValue(){
-        URI uri = UriBuilder.fromUri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1).path("pipes/string_long_short_ro/value").queryParam("filter","name").build();
+    public void testFilteringPipeValue() {
+        URI uri = UriBuilder.fromUri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1).path("pipes/string_long_short_ro/value").queryParam("filter", "name").build();
 
         PipeValue result = client.target(uri)
                 .request().get(PipeValue.class);
@@ -644,7 +662,7 @@ public class V10Test {
     }
 
     @Test
-    public void testFilteringInverted(){
+    public void testFilteringInverted() {
         URI uri = UriBuilder.fromUri(CONTEXT.longScalarWUri).queryParam("filter", "!name").build();
 
         Attribute result = client.target(uri)
@@ -655,7 +673,7 @@ public class V10Test {
     }
 
     @Test(expected = BadRequestException.class)
-    public void testNoValue(){
+    public void testNoValue() {
         URI uri = UriBuilder.fromUri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1).path("attributes").path("no_value").path("value").build();
 
         AttributeValue<?> result = client.target(uri)
@@ -664,7 +682,7 @@ public class V10Test {
     }
 
     @Test
-    public void testAttributeInfo(){
+    public void testAttributeInfo() {
         URI uri = UriBuilder.fromUri(CONTEXT.longScalarWUri).path("info").build();
 
         AttributeInfo result = client.target(uri)
@@ -678,7 +696,7 @@ public class V10Test {
     }
 
     @Test
-    public void testAttributeInfoPut(){
+    public void testAttributeInfoPut() {
         URI uri = UriBuilder.fromUri(CONTEXT.longScalarWUri).path("info").build();
 
         AttributeInfo info = client.target(uri)
@@ -692,5 +710,86 @@ public class V10Test {
 
         assertEquals("1000", result.alarms.max_alarm);
         assertEquals("100", result.events.ch_event.rel_change);
+    }
+
+    @Test
+    public void testCreateSubscription() {
+        URI uri = UriBuilder.fromUri(CONTEXT.uri).path("subscriptions").build();
+
+
+        Subscription result = client.target(uri)
+                .request().post(null, Subscription.class);
+
+        assertNotNull(result);
+        assertEquals(1, result.id);
+    }
+
+    @Test
+    public void testSubscriptions_addEvents() {
+        URI uri = UriBuilder.fromUri(CONTEXT.uri).path("subscriptions/1").build();
+
+
+        Subscription result = client.target(uri)
+                .request()
+                .put(
+                        Entity.entity(
+                                Lists.newArrayList(
+                                        new Event.Target("localhost:10000", "sys/tg_test/1", "double_scalar", "change"),
+                                        new Event.Target("localhost:10000", "sys/tg_test/1", "long_scalar", "periodic")
+                                ),
+                                MediaType.APPLICATION_JSON_TYPE),
+                        Subscription.class);
+
+        assertNotNull(result);
+        assertEquals(1, result.id);
+        assertEquals(2, result.events.size());
+        assertEquals(1, result.events.get(0).id);
+        assertEquals("localhost:10000", result.events.get(0).target.host);
+        assertEquals("sys/tg_test/1", result.events.get(0).target.device);
+        assertEquals("double_scalar", result.events.get(0).target.attribute);
+        assertEquals("change", result.events.get(0).target.type);
+        assertEquals(2, result.events.get(1).id);
+        assertEquals("localhost:10000", result.events.get(1).target.host);
+        assertEquals("sys/tg_test/1", result.events.get(1).target.device);
+        assertEquals("long_scalar", result.events.get(1).target.attribute);
+        assertEquals("periodic", result.events.get(1).target.type);
+    }
+
+    //TODO requires Tango event subscription logic change
+    @Test/*(expected = BadRequestException.class)*/
+    public void testSubscriptions_addNonExistingAttribute() {
+        URI uri = UriBuilder.fromUri(CONTEXT.uri).path("subscriptions/1").build();
+
+
+        Subscription result = client.target(uri)
+                .request()
+                .put(
+                        Entity.entity(
+                                Lists.newArrayList(
+                                        new Event.Target("localhost:10000", "sys/tg_test/1", "XXXX", "change")
+                                ),
+                                MediaType.APPLICATION_JSON_TYPE),
+                        Subscription.class);
+
+        assertNotNull(result);
+    }
+
+    @Test
+    public void testEventStream() throws Exception {
+        URI uri = UriBuilder.fromUri(CONTEXT.uri).path("subscriptions/1/event-stream").build();
+
+        CompletableFuture<String> future = new CompletableFuture<>();
+        WebTarget target = client.target(uri);
+        SseEventSource eventSource = SseEventSource.target(target).build();
+        eventSource.register(event -> {
+            String data = event.readData();
+            System.out.println("Received an event: " + data);
+            future.complete(data);
+        }, ex -> {
+            System.err.println("Received an exception: " + ex.getMessage());
+            future.completeExceptionally(ex);
+        });
+        eventSource.open();
+        assertNotNull(future.get());
     }
 }
