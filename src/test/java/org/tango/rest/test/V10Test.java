@@ -21,6 +21,7 @@ import javax.annotation.Nullable;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.RedirectionException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
@@ -29,15 +30,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.sse.SseEventSource;
 import java.net.URI;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 
 /**
  * @author Igor Khokhriakov <igor.khokhriakov@hzg.de>
@@ -410,6 +409,17 @@ public class V10Test {
                 });
 
         assertEquals(123456, result.value.intValue());
+    }
+
+    @Test(expected = RedirectionException.class)
+    public void testReadAttribute_notModified() {
+        URI uri = UriBuilder.fromUri(CONTEXT.longScalarWUri).path("value").build();
+        AttributeValue<Integer> result = client.target(uri).request()
+                .header("If-Modified-Since", new Date(System.currentTimeMillis() + 3000))//Future!
+                .get(new GenericType<AttributeValue<Integer>>() {
+                });
+
+        fail();
     }
 
     @Test
