@@ -712,8 +712,7 @@ public class V10Test {
         assertEquals("100", result.events.ch_event.rel_change);
     }
 
-    @Test
-    public void testCreateSubscription() {
+    private void createSubscription(){
         URI uri = UriBuilder.fromUri(CONTEXT.uri).path("subscriptions").build();
 
 
@@ -725,7 +724,17 @@ public class V10Test {
     }
 
     @Test
-    public void testSubscriptions_addEvents() {
+    public void testSubscriptions() throws Exception {
+        createSubscription();
+
+        subscriptionAddEvents();
+
+        subscriptionAddNonExistingAttribute();
+
+        testEventStream();
+    }
+
+    public void subscriptionAddEvents() {
         URI uri = UriBuilder.fromUri(CONTEXT.uri).path("subscriptions/1").build();
 
 
@@ -756,8 +765,8 @@ public class V10Test {
     }
 
     //TODO requires Tango event subscription logic change
-    @Test/*(expected = BadRequestException.class)*/
-    public void testSubscriptions_addNonExistingAttribute() {
+//    @Test/*(expected = BadRequestException.class)*/
+    public void subscriptionAddNonExistingAttribute() {
         URI uri = UriBuilder.fromUri(CONTEXT.uri).path("subscriptions/1").build();
 
 
@@ -774,7 +783,6 @@ public class V10Test {
         assertNotNull(result);
     }
 
-    @Test
     public void testEventStream() throws Exception {
         URI uri = UriBuilder.fromUri(CONTEXT.uri).path("subscriptions/1/event-stream").build();
 
