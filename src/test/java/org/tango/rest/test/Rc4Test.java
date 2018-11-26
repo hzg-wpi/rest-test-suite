@@ -7,11 +7,10 @@ import org.jboss.resteasy.specimpl.ResteasyUriBuilder;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.tango.rest.test.rc4.ClientHelper;
 import org.tango.rest.rc4.entities.*;
+import org.tango.rest.test.rc4.ClientHelper;
 
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
@@ -201,7 +200,7 @@ public class Rc4Test {
         CommandResult<String> result = client.target(uri)
                 .request()
                 .put(
-                        Entity.entity("Hello World!!!", MediaType.TEXT_PLAIN_TYPE),
+                        Entity.entity("Hello World!!!", MediaType.APPLICATION_JSON_TYPE),
                         new GenericType<CommandResult<String>>() {
                 });
 
