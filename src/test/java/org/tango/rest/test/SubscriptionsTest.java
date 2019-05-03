@@ -28,7 +28,7 @@ import static org.tango.rest.test.V10Test.REST_API_VERSION;
  * @author Igor Khokhriakov <igor.khokhriakov@hzg.de>
  * @since 5/3/19
  */
-public class Subscriptions {
+public class SubscriptionsTest {
     private static Context CONTEXT;
     private Client client;
     private URI uri = null;
