@@ -14,8 +14,6 @@ import org.tango.rest.test.v10.ClientHelper;
 import org.tango.rest.v10.entities.*;
 import org.tango.rest.v10.entities.pipe.Pipe;
 import org.tango.rest.v10.entities.pipe.PipeValue;
-import org.tango.rest.v10.event.Event;
-import org.tango.rest.v10.event.Subscription;
 
 import javax.annotation.Nullable;
 import javax.ws.rs.BadRequestException;
@@ -24,17 +22,14 @@ import javax.ws.rs.NotFoundException;
 import javax.ws.rs.RedirectionException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.sse.SseEventSource;
 import java.net.URI;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 import static org.junit.Assert.*;
 
@@ -720,94 +715,5 @@ public class V10Test {
 
         assertEquals("1000", result.alarms.max_alarm);
         assertEquals("100", result.events.ch_event.rel_change);
-    }
-
-    private void createSubscription(){
-        URI uri = UriBuilder.fromUri(CONTEXT.uri).path("subscriptions").build();
-
-
-        Subscription result = client.target(uri)
-                .request().post(null, Subscription.class);
-
-        assertNotNull(result);
-        assertEquals(1, result.id);
-    }
-
-    @Test
-    public void testSubscriptions() throws Exception {
-        createSubscription();
-
-        subscriptionAddEvents();
-
-        subscriptionAddNonExistingAttribute();
-
-        testEventStream();
-    }
-
-    public void subscriptionAddEvents() {
-        URI uri = UriBuilder.fromUri(CONTEXT.uri).path("subscriptions/1").build();
-
-
-        Subscription result = client.target(uri)
-                .request()
-                .put(
-                        Entity.entity(
-                                Lists.newArrayList(
-                                        new Event.Target("localhost:10000", "sys/tg_test/1", "double_scalar", "change"),
-                                        new Event.Target("localhost:10000", "sys/tg_test/1", "long_scalar", "periodic")
-                                ),
-                                MediaType.APPLICATION_JSON_TYPE),
-                        Subscription.class);
-
-        assertNotNull(result);
-        assertEquals(1, result.id);
-        assertEquals(2, result.events.size());
-        assertEquals(1, result.events.get(0).id);
-        assertEquals("localhost:10000", result.events.get(0).target.host);
-        assertEquals("sys/tg_test/1", result.events.get(0).target.device);
-        assertEquals("double_scalar", result.events.get(0).target.attribute);
-        assertEquals("change", result.events.get(0).target.type);
-        assertEquals(2, result.events.get(1).id);
-        assertEquals("localhost:10000", result.events.get(1).target.host);
-        assertEquals("sys/tg_test/1", result.events.get(1).target.device);
-        assertEquals("long_scalar", result.events.get(1).target.attribute);
-        assertEquals("periodic", result.events.get(1).target.type);
-    }
-
-    //TODO requires Tango event subscription logic change
-//    @Test/*(expected = BadRequestException.class)*/
-    public void subscriptionAddNonExistingAttribute() {
-        URI uri = UriBuilder.fromUri(CONTEXT.uri).path("subscriptions/1").build();
-
-
-        Subscription result = client.target(uri)
-                .request()
-                .put(
-                        Entity.entity(
-                                Lists.newArrayList(
-                                        new Event.Target("localhost:10000", "sys/tg_test/1", "XXXX", "change")
-                                ),
-                                MediaType.APPLICATION_JSON_TYPE),
-                        Subscription.class);
-
-        assertNotNull(result);
-    }
-
-    public void testEventStream() throws Exception {
-        URI uri = UriBuilder.fromUri(CONTEXT.uri).path("subscriptions/1/event-stream").build();
-
-        CompletableFuture<String> future = new CompletableFuture<>();
-        WebTarget target = client.target(uri);
-        SseEventSource eventSource = SseEventSource.target(target).build();
-        eventSource.register(event -> {
-            String data = event.readData();
-            System.out.println("Received an event: " + data);
-            future.complete(data);
-        }, ex -> {
-            System.err.println("Received an exception: " + ex.getMessage());
-            future.completeExceptionally(ex);
-        });
-        eventSource.open();
-        assertNotNull(future.get());
     }
 }
