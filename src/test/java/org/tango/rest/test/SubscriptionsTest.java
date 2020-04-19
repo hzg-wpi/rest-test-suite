@@ -22,7 +22,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.tango.rest.test.V10Test.REST_API_VERSION;
+import static org.tango.rest.test.V11Test.REST_API_VERSION;
 
 /**
  * @author Igor Khokhriakov <igor.khokhriakov@hzg.de>

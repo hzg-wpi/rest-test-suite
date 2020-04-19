@@ -37,8 +37,8 @@ import static org.junit.Assert.*;
  * @author Igor Khokhriakov <igor.khokhriakov@hzg.de>
  * @since 17.12.2015
  */
-public class V10Test {
-    public static final String REST_API_VERSION = "v10";
+public class V11Test {
+    public static final String REST_API_VERSION = "v11";
     private static Context CONTEXT;
     private Client client;
 
