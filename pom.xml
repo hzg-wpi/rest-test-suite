@@ -3,13 +3,13 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.tango-controls</groupId>
     <artifactId>rest-test-suite</artifactId>
-    <version>2.10-SNAPSHOT</version>
+    <version>2.10</version>
 
     <scm>
         <connection>scm:git:git@github.com:tango-controls/rest-test-suite.git</connection>
         <developerConnection>scm:git:git@github.com:tango-controls/rest-test-suite.git</developerConnection>
         <url>https://github.com/tango-controls/rest-test-suite</url>
-        <tag>HEAD</tag>
+        <tag>rest-test-suite-2.10</tag>
     </scm>
 
     <distributionManagement>
