@@ -548,19 +548,14 @@ public class V11Test {
     public void testDevicePipes() {
         URI uri = UriBuilder.fromUri(CONTEXT.devicesUri).path(CONTEXT.SYS_TG_TEST_1).path("pipes").build();
 
-        List<NamedEntity> result = client.target(uri)
+        List<Pipe> result = client.target(uri)
                 .request()
 //                .header("Accept", MediaType.APPLICATION_JSON)
                 .get(
-                        new GenericType<List<NamedEntity>>() {
+                        new GenericType<List<Pipe>>() {
                         });
 
-        NamedEntity pipe = Iterables.find(result, new Predicate<NamedEntity>() {
-            @Override
-            public boolean apply(@Nullable NamedEntity input) {
-                return input.name.equalsIgnoreCase("string_long_short_ro");
-            }
-        });
+        Pipe pipe = Iterables.find(result, (Predicate<Pipe>) input -> input.name.equalsIgnoreCase("string_long_short_ro"));
 
         assertNotNull(pipe);
     }
