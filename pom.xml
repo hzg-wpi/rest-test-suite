@@ -53,7 +53,7 @@
             <artifactId>rest-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>de.hereon.tango</groupId>
+            <groupId>de.hereon.tango.lang</groupId>
             <artifactId>commons</artifactId>
             <version>1.0.1</version>
             <scope>provided</scope>
