@@ -1,8 +1,4 @@
-[![logo](http://www.tango-controls.org/static/tango/img/logo_tangocontrols.png)](http://www.tango-controls.org)
-
 # Tango REST API Test Suite
-
-[ ![Download](https://api.bintray.com/packages/tango-controls/rest/rest-test-suite/images/download.svg) ](https://bintray.com/tango-controls/rest/rest-test-suite/_latestVersion)
 
 A Test suite for Tango REST API
 
@@ -11,7 +7,7 @@ A Test suite for Tango REST API
 `{PROJECT_ROOT}/pom.xml`
 ```xml
 <dependency>
-  <groupId>org.tango-controls</groupId>
+  <groupId>de.hereon.tango</groupId>
   <artifactId>rest-test-suite</artifactId>
   <version>{LATEST}</version>
   <classifier>tests</classifier>
@@ -23,10 +19,20 @@ A Test suite for Tango REST API
 `{PROJECT_ROOT}/pom.xml` or `{M2_HOME}/settings.xml`
 ```xml
 <repository>
-    <id>tango-controls-rest</id>
-    <url>http://dl.bintray.com/tango-controls/rest</url>
+    <id>github-hzg</id>
+    <url>https://maven.pkg.github.com/hzg-wpi/*</url>
 </repository>
 ``` 
+
+Add corresponding server to settings.xml
+
+```xml
+ <server>
+    <id>github-hzg</id>
+    <username>GITHUB_USER</username>
+    <password>GITHUB_TOKEN</password>
+</server>
+```
 
 # How to run the tests suite #
 
