@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.hereon.tango</groupId>
     <artifactId>rest-test-suite</artifactId>
-    <version>3.0-SNAPSHOT</version>
+    <version>3.1-SNAPSHOT</version>
 
     <scm>
         <connection>scm:git:git@github.com:hzg-wpi/rest-test-suite.git</connection>
